@@ -1,7 +1,7 @@
 server:
   port: 8080
 
-# shows more information of log of spring security
+# shows more items of log of spring security
 logging:
   level:
     org:
@@ -11,17 +11,18 @@ logging:
 # Configurations of this Client
 spring:
   security:
-    oauth2.client:
-      registration:
-        client-sticky-note:
-          provider: spring
-          client-id: client-sticky-note
-          client-secret: secret
-          authorization-grant-type: authorization_code
-          redirect-uri: "http://127.0.0.1:8080/login/oauth2/code/{registrationId}"
-          scope: openid
-          client-name: client-sticky-note
-      provider:
-        spring:
-          # Authorization Server URL
-          issuer-uri: http://localhost:9000
+    oauth2:
+      client:
+        registration:
+          client-sticky-note:
+            provider: spring
+            client-id: client-sticky-note
+            client-secret: secret
+            authorization-grant-type: authorization_code
+            redirect-uri: "http://127.0.0.1:8080/login/oauth2/code/{registrationId}"
+            scope: openid, profile
+            client-name: client-sticky-note
+        provider:
+          spring:
+            # Authorization Server URL
+            issuer-uri: http://localhost:9000
