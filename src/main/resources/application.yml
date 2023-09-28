@@ -26,3 +26,8 @@ spring:
           spring:
             # Authorization Server URL
             issuer-uri: http://localhost:9000
+
+# URL to connect to resource server
+resource:
+  server:
+    url: http://localhost:9090

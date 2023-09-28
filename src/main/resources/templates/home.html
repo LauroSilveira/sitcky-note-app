@@ -1,30 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>List of Notes</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
 </head>
-    <body>
+<body>
+    <div class="container">
         <nav class="navbar navbar-expand-lg bg-body-tertiary d-flex justify-content-around">
             <div class="navbar-nav">
                 <a class="nav-link active" href="/notes/home">See all lists</a>
-                <a class="nav-link" href="updated-list">Updated list</a>
+                <a class="nav-link" href="/notes/update">Updated list</a>
             </div>
             <a href="/notes/form">
-                <button class="btn btn-outline-secondary my-2 my-sm-0">Create list</button>
+                <button class="btn btn-outline-secondary my-2 my-sm-0">New list</button>
             </a>
         </nav>
-        <div class="container" style="width: 18rem;">
+        <div>
             <div class="card text-center mt-3" th:each="tasks : ${notes.tasks}">
                 <div class="card-header" th:text="${tasks.title}">Title</div>
                 <div class="card-body">
-                        <ul class="list-group list-group-flush" th:each="task: ${tasks.task}">
-                            <li class="list-group-item" th:text="${task}">Item task</li>
-                        </ul>
+                    <ul class="list-group list-group-flush" th:each="task: ${tasks.task}">
+                        <li class="list-group-item" th:text="${task}">Item task</li>
+                    </ul>
                 </div>
             </div>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-    </body>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+</body>
 </html>
