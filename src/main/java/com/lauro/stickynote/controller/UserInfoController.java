@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/taskDtos")
+@RequestMapping("/user")
 @Slf4j
-public class TasksController {
+public class UserInfoController {
 
-    @GetMapping("/user")
+    @GetMapping("/info")
     public ResponseEntity<UserInfoDto> userInfo(@RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient client,
                                                 @AuthenticationPrincipal OidcUser oidcUser) {
         return ResponseEntity.ok(new UserInfoDto(client.getAccessToken().getTokenValue(), client.getRefreshToken().getTokenValue(), oidcUser.getIdToken().getTokenValue(),

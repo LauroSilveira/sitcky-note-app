@@ -1,6 +1,14 @@
 package com.lauro.stickynote.dto;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record TaskDto(String title, List<String> task) {
+import java.util.List;
+public record TaskDto(@JsonProperty("title") String title,
+                      @JsonProperty("description") String description) {
+
+    public TaskDto(String title, String description) {
+        this.title = title;
+        this.description = description;
+    }
+
 }
