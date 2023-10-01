@@ -17,11 +17,11 @@
             </a>
         </nav>
         <div>
-            <div class="card text-center mt-3" th:each="tasks : ${notes.tasks}">
-                <div class="card-header" th:text="${tasks.title}">Title</div>
+            <div class="card text-center mt-3" th:each="task:${notes.tasks}">
+                <div class="card-header" th:text="${task.title}">Title</div>
                 <div class="card-body">
-                    <ul class="list-group list-group-flush" th:each="task: ${tasks.task}">
-                        <li class="list-group-item" th:text="${task}">Item task</li>
+<!--                    <ul class="list-group list-group-flush" th:each="task:${task}">-->
+                        <li class="list-group-item" th:text="${task.description}">Item task</li>
                     </ul>
                 </div>
             </div>

@@ -6,7 +6,6 @@ import com.lauro.stickynote.dto.TasksDto;
 import com.lauro.stickynote.service.ResourceService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.stereotype.Controller;
@@ -25,22 +24,20 @@ import java.util.List;
 @Slf4j
 public class NotesController {
 
-    private ResourceService service;
+    private final ResourceService service;
 
     public NotesController(ResourceService service) {
         this.service = service;
     }
 
     @GetMapping("/home")
-    public String getNotes(Model model) {
-        final var notes = new TasksDto(List.of(new TaskDto(
-                "Lista de compras Carrefour", List.of("pan", "pescado", "tomate")),
-                new TaskDto("List de compras Aldi", List.of("Somat", "Jabon lavavajillas")),
-                new TaskDto("Concesionario", List.of("Recoger llave reserva", "reivsion anual"))));
-
-        model.addAttribute("notes", notes);
-        return "home";
+    public Mono<ModelAndView> getAllNotes(@RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient client) {
+        log.info("[NotesController] - Request getAllNotes");
+        final var model = new ModelAndView("home");
+        return this.service.getAllNotes(client)
+                .map(tasksDto -> model.addObject("notes", tasksDto));
     }
+
 
     @GetMapping("/form")
     public String getForm() {
@@ -63,7 +60,7 @@ public class NotesController {
                 .map(responseEntity -> {
                     var modelAndView = new ModelAndView("home");
                     final var tasksDto = new TasksDto(List.of(new TaskDto(responseEntity.getBody().title(),
-                            List.of(responseEntity.getBody().description()))));
+                            responseEntity.getBody().description())));
                     modelAndView.addObject("notes", tasksDto);
                     return modelAndView;
                 });
