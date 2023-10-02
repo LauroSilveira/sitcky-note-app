@@ -25,8 +25,8 @@
                     </ul>
                 </div>
                 <div class="card-footer">
-                    <a href="/notes/update" th:href="@{'/notes/note/' + ${task.id}}" class="btn btn-outline-secondary my-2 my-sm-0">update</a>
-                    <a href="/notes/delete" th:href="@{'/notes/delete/' + ${task.id}}" class="btn btn-outline-danger my-2 my-sm-0">delete</a>
+                    <a th:href="@{'/notes/note/' + ${task.id}}" class="btn btn-outline-secondary my-2 my-sm-0">update</a>
+                    <a th:href="@{'/notes/delete/' + ${task.id}}" class="btn btn-outline-danger my-2 my-sm-0">delete</a>
                 </div>
             </div>
         </div>

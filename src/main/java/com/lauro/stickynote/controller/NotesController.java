@@ -76,11 +76,16 @@ public class NotesController {
                 .map(tasksDto -> model.addObject("notes", tasksDto));
     }
 
-    @DeleteMapping("/delete/{id}")
-    public String deleteNote(@PathVariable String id, @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient) {
-        log.info("[NotesController] - received request to delete note: {}", id);
+    @GetMapping(value = "/delete/{id}")
+    public Mono<ModelAndView> deleteNote(@PathVariable String id, @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient) {
+        log.info("[NotesController] - received request to Delete note: {}", id);
 
-        this.service.deteleNote(id, authorizedClient);
-        return "redirect:/notes/home";
+        return this.service.deteleNote(id, authorizedClient)
+                .map(tasksDto -> {
+                    final var model = new ModelAndView("home");
+                    model.addObject("notes", tasksDto);
+                    return model;
+                });
+        // return "redirect:/notes/home";
     }
 }

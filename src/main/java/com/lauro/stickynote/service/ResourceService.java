@@ -74,10 +74,10 @@ public class ResourceService {
                 .doOnNext(response -> new TasksDto(response.tasks()));
     }
 
-    public Mono<TaskDto> getNoteById(final String taskId, final OAuth2AuthorizedClient authorizedClient) {
+    public Mono<TaskDto> getNoteById(final String id, final OAuth2AuthorizedClient authorizedClient) {
         log.info("[ResourceService] - Request GetNotebyID to resource server");
         return this.webClient.method(GET)
-                .uri("/tasks/note/{taskId}", taskId)
+                .uri("/tasks/note/{id}", id)
                 .header("Authorization", "Bearer %s".formatted(authorizedClient.getAccessToken().getTokenValue()),
                         HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .retrieve()
@@ -87,7 +87,7 @@ public class ResourceService {
                 .doOnNext(response -> new TaskDto(response.id(), response.title(), response.title()));
     }
 
-    public Mono<ResponseEntity<Void>> deteleNote(String id, OAuth2AuthorizedClient authorizedClient) {
+    public Mono<TasksDto> deteleNote(String id, OAuth2AuthorizedClient authorizedClient) {
         log.info("[ResourceService] - Request Delete to resource server");
         return this.webClient
                 .method(DELETE)
@@ -97,7 +97,8 @@ public class ResourceService {
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> this.handleResponse(clientResponse))
                 .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> this.handleResponse(clientResponse))
-                .toBodilessEntity();
+                .bodyToMono(TasksDto.class)
+                .doOnNext(response -> new TasksDto(response.tasks()));
     }
 
     private Mono<? extends Throwable> handleResponse(final ClientResponse statusCode) {
