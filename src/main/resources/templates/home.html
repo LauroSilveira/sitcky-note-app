@@ -10,7 +10,6 @@
         <nav class="navbar navbar-expand-lg bg-body-tertiary d-flex justify-content-around">
             <div class="navbar-nav">
                 <a class="nav-link active" href="/notes/home">See all lists</a>
-                <a class="nav-link" href="/notes/update">Updated list</a>
             </div>
             <a href="/notes/form">
                 <button class="btn btn-outline-secondary my-2 my-sm-0">New list</button>
@@ -18,11 +17,16 @@
         </nav>
         <div>
             <div class="card text-center mt-3" th:each="task:${notes.tasks}">
+                <!-- Envia CSRF automaticamente com o thymeleaf atraves da tag th:action-->
+                <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
                 <div class="card-header" th:text="${task.title}">Title</div>
                 <div class="card-body">
-<!--                    <ul class="list-group list-group-flush" th:each="task:${task}">-->
                         <li class="list-group-item" th:text="${task.description}">Item task</li>
                     </ul>
+                </div>
+                <div class="card-footer">
+                    <a href="/notes/update" th:href="@{'/notes/note/' + ${task.id}}" class="btn btn-outline-secondary my-2 my-sm-0">update</a>
+                    <a href="/notes/delete" th:href="@{'/notes/delete/' + ${task.id}}" class="btn btn-outline-danger my-2 my-sm-0">delete</a>
                 </div>
             </div>
         </div>

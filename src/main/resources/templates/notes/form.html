@@ -10,11 +10,10 @@
       <nav class="navbar navbar-expand-lg bg-body-tertiary d-flex justify-content-between mb-3">
           <div class="navbar-nav">
               <a class="nav-link active" href="/notes/home">See all lists</a>
-              <a class="nav-link" href="/notes/update">Update list</a>
           </div>
       </nav>
       <div class="card">
-          <form th:object="${createTaskDto}" class="card-body" th:action="@{/notes/create}", method="post">
+          <form th:object="${createTaskDto}" class="card-body" th:action="@{/notes/create}" method="post">
               <!-- Envia CSRF automaticamente com o thymeleaf atraves da tag th:action-->
               <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
               <div class="form-group mb-3">
