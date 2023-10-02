@@ -10,22 +10,22 @@
       <nav class="navbar navbar-expand-lg bg-body-tertiary d-flex justify-content-between mb-3">
           <div class="navbar-nav">
               <a class="nav-link active" href="/notes/home">See all lists</a>
-              <a class="nav-link" href="/notes/update">Update list</a>
           </div>
       </nav>
       <div class="card">
-          <form th:object="${createTaskDto}" class="card-body" th:action="@{/notes/create}", method="post">
+          <form class="card-body" th:action="@{/notes/update}" th:object="${createTaskDto}" th:method="put">
               <!-- Envia CSRF automaticamente com o thymeleaf atraves da tag th:action-->
               <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+              <input type="hidden" th:name="id" th:value="${id}"/>
               <div class="form-group mb-3">
-                  <label class="form-label" id="title">Title</label>
-                  <input th:text="${title}" name="title" class="form-control" placeholder="Write your title there">
+                  <label class="form-label">Title</label>
+                  <input th:name="title" th:value="${title}" class="form-control" placeholder="Write your title there">
               </div>
               <div class="form-group mb-3">
-                  <label class="form-label" id="description">Notes Description</label>
+                  <label class="form-label">Notes Description</label>
                   <textarea th:text="${description}" name="description" class="form-control" placeholder="Write your note here"></textarea>
               </div>
-              <button class="btn btn-primary" type="submit">Create</button>
+              <button class="btn btn-primary" type="submit">Update</button>
           </form>
       </div>
   </div>

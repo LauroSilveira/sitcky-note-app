@@ -2,9 +2,11 @@ package com.lauro.stickynote.service;
 
 import com.lauro.stickynote.config.Properties;
 import com.lauro.stickynote.dto.CreateTaskDto;
+import com.lauro.stickynote.dto.TaskDto;
 import com.lauro.stickynote.dto.TasksDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
@@ -14,7 +16,7 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.*;
 import static reactor.core.publisher.Mono.just;
 
 @Service
@@ -28,37 +30,80 @@ public class ResourceService {
     }
 
 
-    public Mono<ResponseEntity<CreateTaskDto>> createNote(CreateTaskDto dto, OAuth2AuthorizedClient client) {
-        log.info("[ResourceService] - Request to resource server");
+    public Mono<TasksDto> createNote(CreateTaskDto dto, OAuth2AuthorizedClient authorizedClient) {
+        log.info("[ResourceService] - Request createNote to resource server");
 
-        return this.webClient
-                .post()
-                .uri("/create")
-                .header("Authorization", "Bearer %s".formatted(client.getAccessToken().getTokenValue()),
+        return this.webClient.post()
+                .uri("/tasks/create")
+                .header("Authorization", "Bearer %s".formatted(authorizedClient.getAccessToken().getTokenValue()),
                         HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(just(dto), CreateTaskDto.class)
-                .exchangeToMono(this::handleResponse);
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> this.handleResponse(clientResponse))
+                .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> this.handleResponse(clientResponse))
+                .bodyToMono(TasksDto.class)
+                .doOnNext(response -> new TasksDto(response.tasks()));
     }
 
-    public Mono<TasksDto> getAllNotes(OAuth2AuthorizedClient client) {
-        log.info("[ResourceService] - Request to resource server to retrieve all notes");
+    public Mono<TasksDto> getAllNotes(OAuth2AuthorizedClient authorizedClient) {
+        log.info("[ResourceService] - Request getAllNotes to resource server");
 
         return this.webClient.method(GET)
                 .uri("/tasks/notes")
-                .header("Authorization", "Bearer %s".formatted(client.getAccessToken().getTokenValue()))
+                .header("Authorization", "Bearer %s".formatted(authorizedClient.getAccessToken().getTokenValue()))
                 .retrieve()
                 .onStatus(responseHttpStatus -> !responseHttpStatus.is2xxSuccessful(),
                         response -> Mono.error(new RuntimeException("Failed to fetch all notes. Status Code returned: " + response.statusCode())))
                 .bodyToMono(TasksDto.class)
-                .doOnNext(tasksDto -> new TasksDto(tasksDto.tasks()));
+                .doOnNext(response -> new TasksDto(response.tasks()));
     }
 
-    private Mono<ResponseEntity<CreateTaskDto>> handleResponse(final ClientResponse response) {
-        if (response.statusCode().is2xxSuccessful()) {
-            return response.toEntity(CreateTaskDto.class);
-        } else if (response.statusCode().is4xxClientError()) {
+    public Mono<TasksDto> updateNote(CreateTaskDto dto, OAuth2AuthorizedClient authorizedClient) {
+        log.info("[ResourceService] - Request updateNote to resource server");
+
+        return this.webClient
+                .method(PUT)
+                .uri("/tasks/update")
+                .header("Authorization", "Bearer %s".formatted(authorizedClient.getAccessToken().getTokenValue()),
+                        HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(just(dto), CreateTaskDto.class)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> this.handleResponse(clientResponse))
+                .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> this.handleResponse(clientResponse))
+                .bodyToMono(TasksDto.class)
+                .doOnNext(response -> new TasksDto(response.tasks()));
+    }
+
+    public Mono<TaskDto> getNoteById(final String taskId, final OAuth2AuthorizedClient authorizedClient) {
+        log.info("[ResourceService] - Request GetNotebyID to resource server");
+        return this.webClient.method(GET)
+                .uri("/tasks/note/{taskId}", taskId)
+                .header("Authorization", "Bearer %s".formatted(authorizedClient.getAccessToken().getTokenValue()),
+                        HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .retrieve()
+                .onStatus(responseHttpStatus -> !responseHttpStatus.is2xxSuccessful(),
+                        response -> Mono.error(new RuntimeException("Failed to fetch note. Status Code returned: " + response.statusCode())))
+                .bodyToMono(TaskDto.class)
+                .doOnNext(response -> new TaskDto(response.id(), response.title(), response.title()));
+    }
+
+    public Mono<ResponseEntity<Void>> deteleNote(String id, OAuth2AuthorizedClient authorizedClient) {
+        log.info("[ResourceService] - Request Delete to resource server");
+        return this.webClient
+                .method(DELETE)
+                .uri("/tasks/delete/{id}", id)
+                .header("Authorization", "Bearer %s".formatted(authorizedClient.getAccessToken().getTokenValue()),
+                        HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> this.handleResponse(clientResponse))
+                .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> this.handleResponse(clientResponse))
+                .toBodilessEntity();
+    }
+
+    private Mono<? extends Throwable> handleResponse(final ClientResponse statusCode) {
+        if (statusCode.statusCode().is4xxClientError()) {
             return Mono.error(new Exception("Not found"));
-        } else if (response.statusCode().is5xxServerError()) {
+        } else if (statusCode.statusCode().is5xxServerError()) {
             return Mono.error(new RuntimeException("Internal Server error"));
         } else {
             return Mono.error(new RuntimeException("Unexpected error"));
