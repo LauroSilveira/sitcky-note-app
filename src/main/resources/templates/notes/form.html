@@ -24,7 +24,8 @@
                   <label class="form-label" id="description">Notes Description</label>
                   <textarea th:text="${description}" name="description" class="form-control" placeholder="Write your note here"></textarea>
               </div>
-              <button class="btn btn-primary" type="submit">Create</button>
+              <button class="btn btn-outline-primary" type="submit">Create</button>
+              <a th:href="@{/notes/home}" class="btn btn-outline-secondary my-2 my-sm-0">Back</a>
           </form>
       </div>
   </div>

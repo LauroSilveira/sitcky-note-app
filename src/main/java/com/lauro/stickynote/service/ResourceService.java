@@ -4,6 +4,7 @@ import com.lauro.stickynote.config.Properties;
 import com.lauro.stickynote.dto.CreateTaskDto;
 import com.lauro.stickynote.dto.TaskDto;
 import com.lauro.stickynote.dto.TasksDto;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
@@ -11,7 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -99,6 +99,21 @@ public class ResourceService {
                 .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> this.handleResponse(clientResponse))
                 .bodyToMono(TasksDto.class)
                 .doOnNext(response -> new TasksDto(response.tasks()));
+    }
+
+    public Mono<Boolean> sendEmail(String id, OAuth2AuthorizedClient authorizedClient) {
+        log.info("[ResourceService] - Received request of User: {} to send e-mail", authorizedClient.getPrincipalName());
+
+        return this.webClient
+                .method(GET)
+                .uri("/tasks/email/{id}", id)
+                .header("Authorization", "Bearer %s".formatted(authorizedClient.getAccessToken().getTokenValue()),
+                        HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> this.handleResponse(clientResponse))
+                .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> this.handleResponse(clientResponse))
+                .bodyToMono(Boolean.class);
+
     }
 
     private Mono<? extends Throwable> handleResponse(final ClientResponse statusCode) {
