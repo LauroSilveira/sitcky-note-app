@@ -44,8 +44,9 @@
                             <button type="submit" class="btn btn-outline-primary my-2 my-sm-0">send e-mail</button>
                         </form>
                     </div>
-                <div th:if="${message}" th:text="${message}" th:class="${'alert ' + alertClass}">Email message</div>
             </div>
+            <!-- Show message of the e-mail-->
+            <div th:if="${message}" th:text="${message}" th:class="${'alert ' + alertClass}">Email message</div>
         </div>
     </div>
     <!-- BootStrap -->

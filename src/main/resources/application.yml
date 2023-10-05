@@ -27,7 +27,7 @@ spring:
           spring:
             # Authorization Server URL
             issuer-uri: http://localhost:9000
-  # Enable hidden method PUT,DELETE in form actions
+  # Enable hidden method PUT, DELETE in form actions
   mvc:
     hiddenmethod:
       filter:
