@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import reactor.core.publisher.Mono;
 
 @Controller
@@ -26,9 +27,9 @@ public class NotesController {
     @GetMapping("/home")
     public Mono<ModelAndView> getAllNotes(@RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient client) {
         log.info("[NotesController] - Request getAllNotes");
-        final var model = new ModelAndView("home");
+        final var model = new ModelAndView("notes/home");
         return this.service.getAllNotes(client)
-                .map(tasksDto -> model.addObject("notes", tasksDto));
+                .map(tasks -> model.addObject("tasks", tasks));
     }
 
 
@@ -48,9 +49,9 @@ public class NotesController {
         if (result.hasErrors()) {
             return Mono.just(new ModelAndView("notes/form"));
         }
-        final var model = new ModelAndView("home");
+        final var model = new ModelAndView("notes/home");
         return this.service.createNote(createTaskDto, authorizedClient)
-                .map(tasksDto -> model.addObject("notes", tasksDto));
+                .map(tasks -> model.addObject("tasks", tasks));
     }
 
     @GetMapping("/note/{id}")
@@ -71,21 +72,37 @@ public class NotesController {
         if (result.hasErrors()) {
             return Mono.just(new ModelAndView("notes/update"));
         }
-        final var model = new ModelAndView("home");
+        final var model = new ModelAndView("notes/home");
         return this.service.updateNote(createTaskDto, authorizedClient)
-                .map(tasksDto -> model.addObject("notes", tasksDto));
+                .map(tasks -> model.addObject("tasks", tasks));
     }
 
-    @GetMapping(value = "/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public Mono<ModelAndView> deleteNote(@PathVariable String id, @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient) {
         log.info("[NotesController] - received request to Delete note: {}", id);
 
         return this.service.deteleNote(id, authorizedClient)
-                .map(tasksDto -> {
-                    final var model = new ModelAndView("home");
-                    model.addObject("notes", tasksDto);
+                .map(tasks -> {
+                    final var model = new ModelAndView("notes/home");
+                    model.addObject("tasks", tasks);
                     return model;
                 });
-        // return "redirect:/notes/home";
+    }
+
+    @GetMapping("/email/{id}")
+    public Mono<String> sendEmail(@PathVariable String id, @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient,
+                                  RedirectAttributes redirectAttributes) {
+        log.info("[NotesController] - Received request of User: {} to send e-mail", authorizedClient.getPrincipalName());
+        return this.service.sendEmail(id, authorizedClient)
+                .map(result -> {
+                    if(Boolean.TRUE.equals(result)) {
+                        redirectAttributes.addFlashAttribute("message", "E-mail sent with Success!");
+                        redirectAttributes.addFlashAttribute("alertClass", "alert-success");
+                    }else {
+                        redirectAttributes.addFlashAttribute("message", "Failed to send E-mail!");
+                        redirectAttributes.addFlashAttribute("alertClass", "alert-danger");
+                    }
+                    return "redirect:/notes/home";
+                });
     }
 }
