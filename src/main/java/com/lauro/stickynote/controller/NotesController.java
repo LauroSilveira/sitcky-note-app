@@ -49,9 +49,11 @@ public class NotesController {
         if (result.hasErrors()) {
             return Mono.just(new ModelAndView("notes/form"));
         }
-        final var model = new ModelAndView("notes/home");
         return this.service.createNote(createTaskDto, authorizedClient)
-                .map(tasks -> model.addObject("tasks", tasks));
+                .map(tasks -> {
+                    final var model = new ModelAndView("notes/home");
+                    return model.addObject("tasks", tasks);
+                });
     }
 
     @GetMapping("/note/{id}")
@@ -72,9 +74,11 @@ public class NotesController {
         if (result.hasErrors()) {
             return Mono.just(new ModelAndView("notes/update"));
         }
-        final var model = new ModelAndView("notes/home");
         return this.service.updateNote(createTaskDto, authorizedClient)
-                .map(tasks -> model.addObject("tasks", tasks));
+                .map(tasks -> {
+                    final var model = new ModelAndView("notes/home");
+                    return model.addObject("tasks", tasks);
+                });
     }
 
     @DeleteMapping("/delete/{id}")
@@ -84,8 +88,7 @@ public class NotesController {
         return this.service.deteleNote(id, authorizedClient)
                 .map(tasks -> {
                     final var model = new ModelAndView("notes/home");
-                    model.addObject("tasks", tasks);
-                    return model;
+                    return model.addObject("tasks", tasks);
                 });
     }
 
