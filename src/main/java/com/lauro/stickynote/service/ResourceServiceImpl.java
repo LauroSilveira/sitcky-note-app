@@ -48,10 +48,10 @@ public class ResourceServiceImpl implements ResourceService {
     public Mono<TasksDto> getAllNotes(OAuth2AuthorizedClient authorizedClient) {
         log.info("[ResourceServiceImpl] - Request getAllNotes to resource server");
 
-        return this.webClient.get()
+        return this.webClient.method(GET)
                 .uri("/tasks/notes")
-                //Another way to send headers information and using webclient.get()
-                .headers(httpHeaders -> httpHeaders.add("Authorization", "Bearer %s".formatted(authorizedClient.getAccessToken().getTokenValue())))
+                .header("Authorization", "Bearer %s".formatted(authorizedClient.getAccessToken().getTokenValue()),
+                        HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .retrieve()
                 .onStatus(responseHttpStatus -> !responseHttpStatus.is2xxSuccessful(),
                         response -> Mono.error(new RuntimeException("Failed to fetch all notes. Status Code returned: " + response.statusCode())))
