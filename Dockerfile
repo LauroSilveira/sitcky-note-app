@@ -3,7 +3,7 @@ COPY . .
 RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:21-jre-alpine
-WORKDIR /authorization-server
+WORKDIR /sticky-note
 
 COPY --from=build target/*.jar sticky-note.jar
 EXPOSE 8080
