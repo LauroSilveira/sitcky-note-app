@@ -20,13 +20,13 @@ spring:
             client-id: client-sticky-note
             client-secret: secret
             authorization-grant-type: authorization_code
-            redirect-uri: ${CLIENT_REDIRECT_URI:"http://127.0.0.1:8080/login/oauth2/code/{registrationId}"}
+            redirect-uri: ${CLIENT_REDIRECT_URL:"http://127.0.0.1:8080/login/oauth2/code/{registrationId}"}
             scope: openid, profile
             client-name: client-sticky-note
         provider:
           spring:
             # Authorization Server URL
-            issuer-uri: ${AUTHORIZATION_SERVER_URI:http://localhost:9000}
+            issuer-uri: ${AUTHORIZATION_SERVER_URL}
   # Enable hidden method PUT, DELETE in form actions
   mvc:
     hiddenmethod:
@@ -36,4 +36,4 @@ spring:
 # URL to connect to resource server
 resource:
   server:
-    url: ${RESOURCE_SERVER_URI:http://localhost:9090}
+    url: ${RESOURCE_SERVER_URL}
