@@ -36,4 +36,5 @@ spring:
 # URL to connect to resource server
 resource:
   server:
-    url: ${RESOURCE_SERVER_URI:http://localhost:9090}
+    url: ${RESOURCE_SERVER_URL:http://localhost:9090}
+
