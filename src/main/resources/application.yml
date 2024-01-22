@@ -26,7 +26,7 @@ spring:
         provider:
           spring:
             # Authorization Server URL
-            issuer-uri: ${AUTHORIZATION_SERVER_URL}
+            issuer-uri: ${AUTHORIZATION_SERVER_URL:http://localhost:9000}
   # Enable hidden method PUT, DELETE in form actions
   mvc:
     hiddenmethod:
@@ -36,4 +36,4 @@ spring:
 # URL to connect to resource server
 resource:
   server:
-    url: ${RESOURCE_SERVER_URL}
+    url: ${RESOURCE_SERVER_URI:http://localhost:9090}
