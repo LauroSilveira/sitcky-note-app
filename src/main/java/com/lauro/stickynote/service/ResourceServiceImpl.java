@@ -38,8 +38,8 @@ public class ResourceServiceImpl implements ResourceService {
                         HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(just(dto), CreateTaskDto.class)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> this.handleResponse(clientResponse))
-                .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> this.handleResponse(clientResponse))
+                .onStatus(HttpStatusCode::is4xxClientError, this::handleResponse)
+                .onStatus(HttpStatusCode::is5xxServerError, this::handleResponse)
                 .bodyToMono(TasksDto.class)
                 .doOnNext(response -> new TasksDto(response.tasks()));
     }
@@ -47,6 +47,8 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public Mono<TasksDto> getAllNotes(OAuth2AuthorizedClient authorizedClient) {
         log.info("[ResourceServiceImpl] - Request getAllNotes to resource server");
+
+        log.info("Bearer Token: {}", authorizedClient.getAccessToken().getTokenValue());
 
         return this.webClient.method(GET)
                 .uri("/tasks/notes")
@@ -64,22 +66,23 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public Mono<TasksDto> updateNote(CreateTaskDto dto, OAuth2AuthorizedClient authorizedClient) {
         log.info("[ResourceServiceImpl] - Request updateNote to resource server");
-
+        log.info("Bearer Token: {}", authorizedClient.getAccessToken().getTokenValue());
         return this.webClient
                 .put()
                 .uri("/tasks/update")
                 .headers(httpHeaders -> httpHeaders.add("Authorization", "Bearer %s".formatted(authorizedClient.getAccessToken().getTokenValue())))
                 .body(just(dto), CreateTaskDto.class)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> this.handleResponse(clientResponse))
-                .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> this.handleResponse(clientResponse))
+                .onStatus(HttpStatusCode::is4xxClientError, this::handleResponse)
+                .onStatus(HttpStatusCode::is5xxServerError, this::handleResponse)
                 .bodyToMono(TasksDto.class)
                 .doOnNext(response -> new TasksDto(response.tasks()));
     }
 
     @Override
     public Mono<TaskDto> getNoteById(final String id, final OAuth2AuthorizedClient authorizedClient) {
-        log.info("[ResourceServiceImpl] - Request GetNotebyID to resource server");
+        log.info("[ResourceServiceImpl] - Request GetNote by ID to resource server");
+        log.info("Bearer Token: {}", authorizedClient.getAccessToken().getTokenValue());
         return this.webClient.method(GET)
                 .uri("/tasks/note/{id}", id)
                 .header("Authorization", "Bearer %s".formatted(authorizedClient.getAccessToken().getTokenValue()),
@@ -94,14 +97,15 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public Mono<TasksDto> deteleNote(String id, OAuth2AuthorizedClient authorizedClient) {
         log.info("[ResourceServiceImpl] - Request Delete to resource server");
+        log.info("Bearer Token: {}", authorizedClient.getAccessToken().getTokenValue());
         return this.webClient
                 .method(DELETE)
                 .uri("/tasks/delete/{id}", id)
                 .header("Authorization", "Bearer %s".formatted(authorizedClient.getAccessToken().getTokenValue()),
                         HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> this.handleResponse(clientResponse))
-                .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> this.handleResponse(clientResponse))
+                .onStatus(HttpStatusCode::is4xxClientError, this::handleResponse)
+                .onStatus(HttpStatusCode::is5xxServerError, this::handleResponse)
                 .bodyToMono(TasksDto.class)
                 .doOnNext(response -> new TasksDto(response.tasks()));
     }
@@ -109,15 +113,15 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public Mono<Boolean> sendEmail(String id, OAuth2AuthorizedClient authorizedClient) {
         log.info("[ResourceServiceImpl] - Received request of User: {} to send e-mail", authorizedClient.getPrincipalName());
-
+        log.info("Bearer Token: {}", authorizedClient.getAccessToken().getTokenValue());
         return this.webClient
                 .method(GET)
                 .uri("/tasks/email/{id}", id)
                 .header("Authorization", "Bearer %s".formatted(authorizedClient.getAccessToken().getTokenValue()),
                         HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> this.handleResponse(clientResponse))
-                .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> this.handleResponse(clientResponse))
+                .onStatus(HttpStatusCode::is4xxClientError, this::handleResponse)
+                .onStatus(HttpStatusCode::is5xxServerError, this::handleResponse)
                 .bodyToMono(Boolean.class);
 
     }
