@@ -31,8 +31,8 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public Mono<TasksDto> createNote(CreateTaskDto dto, OAuth2AuthorizedClient authorizedClient) {
         log.info("[ResourceServiceImpl] - Request createNote to resource server");
-
-        return this.webClient.post()
+        log.info("Bearer Token: {}", "Bearer %s".formatted(authorizedClient.getAccessToken().getTokenValue()));
+        return this.webClient.method(POST)
                 .uri("/tasks/create")
                 .header("Authorization", "Bearer %s".formatted(authorizedClient.getAccessToken().getTokenValue()),
                         HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -47,7 +47,6 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public Mono<TasksDto> getAllNotes(OAuth2AuthorizedClient authorizedClient) {
         log.info("[ResourceServiceImpl] - Request getAllNotes to resource server");
-
         log.info("Bearer Token: {}", authorizedClient.getAccessToken().getTokenValue());
 
         return this.webClient.method(GET)
@@ -67,8 +66,7 @@ public class ResourceServiceImpl implements ResourceService {
     public Mono<TasksDto> updateNote(CreateTaskDto dto, OAuth2AuthorizedClient authorizedClient) {
         log.info("[ResourceServiceImpl] - Request updateNote to resource server");
         log.info("Bearer Token: {}", authorizedClient.getAccessToken().getTokenValue());
-        return this.webClient
-                .put()
+        return this.webClient.method(PUT)
                 .uri("/tasks/update")
                 .headers(httpHeaders -> httpHeaders.add("Authorization", "Bearer %s".formatted(authorizedClient.getAccessToken().getTokenValue())))
                 .body(just(dto), CreateTaskDto.class)
@@ -82,7 +80,7 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public Mono<TaskDto> getNoteById(final String id, final OAuth2AuthorizedClient authorizedClient) {
         log.info("[ResourceServiceImpl] - Request GetNote by ID to resource server");
-        log.info("Bearer Token: {}", authorizedClient.getAccessToken().getTokenValue());
+        log.info("Bearer Token: {}", "Bearer %s".formatted(authorizedClient.getAccessToken().getTokenValue()));
         return this.webClient.method(GET)
                 .uri("/tasks/note/{id}", id)
                 .header("Authorization", "Bearer %s".formatted(authorizedClient.getAccessToken().getTokenValue()),
@@ -97,7 +95,7 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public Mono<TasksDto> deteleNote(String id, OAuth2AuthorizedClient authorizedClient) {
         log.info("[ResourceServiceImpl] - Request Delete to resource server");
-        log.info("Bearer Token: {}", authorizedClient.getAccessToken().getTokenValue());
+        log.info("Bearer Token: {}", "Bearer %s".formatted(authorizedClient.getAccessToken().getTokenValue()));
         return this.webClient
                 .method(DELETE)
                 .uri("/tasks/delete/{id}", id)
@@ -113,7 +111,7 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public Mono<Boolean> sendEmail(String id, OAuth2AuthorizedClient authorizedClient) {
         log.info("[ResourceServiceImpl] - Received request of User: {} to send e-mail", authorizedClient.getPrincipalName());
-        log.info("Bearer Token: {}", authorizedClient.getAccessToken().getTokenValue());
+        log.info("Bearer Token: {}", "Bearer %s".formatted(authorizedClient.getAccessToken().getTokenValue()));
         return this.webClient
                 .method(GET)
                 .uri("/tasks/email/{id}", id)
