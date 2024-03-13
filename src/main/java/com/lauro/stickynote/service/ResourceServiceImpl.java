@@ -6,6 +6,7 @@ import com.lauro.stickynote.dto.TaskDto;
 import com.lauro.stickynote.dto.TasksDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
@@ -58,9 +59,10 @@ public class ResourceServiceImpl implements ResourceService {
                 .onStatus(responseHttpStatus -> !responseHttpStatus.is2xxSuccessful(),
                         response -> Mono.error(new RuntimeException("Failed to fetch all notes. Status Code returned: " + response.statusCode())))
                 .bodyToMono(TasksDto.class)
-                //Return a TaskDto with an empyt list if there is an error
-                .onErrorResume(Exception.class, e -> Mono.just(new TasksDto(null)))
                 .doOnNext(response -> new TasksDto(response.tasks()));
+                //Return a TaskDto with an empyt list if there is an error
+                //.onErrorResume(Exception.class, e -> Mono.just(new TasksDto(null)))
+                //.doOnNext(response -> new TasksDto(response.tasks()));
     }
 
     @Override

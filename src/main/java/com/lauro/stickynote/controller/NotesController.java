@@ -7,10 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.method.support.ModelAndViewContainer;
 import reactor.core.publisher.Mono;
 
 @Controller
@@ -24,15 +24,6 @@ public class NotesController {
         this.service = service;
     }
 
-    @GetMapping("/home")
-    public Mono<ModelAndView> getAllNotes(@RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient client) {
-        log.info("[NotesController] - Request getAllNotes");
-        final var model = new ModelAndView("notes/home");
-        return this.service.getAllNotes(client)
-                .map(tasks -> model.addObject("tasks", tasks));
-    }
-
-
     @GetMapping("/form")
     public String getForm() {
         return "notes/form";
@@ -43,69 +34,78 @@ public class NotesController {
         return "notes/update";
     }
 
+    @GetMapping("/home")
+    public Mono<String> getAllNotes(@RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient client, Model model) {
+        log.info("[NotesController] - Request getAllNotes");
+        return this.service.getAllNotes(client)
+                .map(tasksDto -> model.addAttribute("tasks", tasksDto))
+                .map(view -> "/notes/home");
+    }
+
+
     @PostMapping("/create")
-    public Mono<ModelAndView> createNote(@Valid CreateTaskDto createTaskDto, BindingResult result, @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient) {
+    public Mono<String> createNote(@Valid CreateTaskDto createTaskDto, BindingResult result, @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient, Model model) {
         log.info("[NotesController] - received request to create new note: {}", createTaskDto);
         if (result.hasErrors()) {
-            return Mono.just(new ModelAndView("notes/form"));
+            return Mono.just("notes/form");
+
         }
         return this.service.createNote(createTaskDto, authorizedClient)
-                .map(tasks -> {
-                    final var model = new ModelAndView("notes/home");
-                    return model.addObject("tasks", tasks);
-                });
+                .map(tasks ->
+                        model.addAttribute("tasks", tasks))
+                .map(view -> "/notes/home");
     }
 
     @GetMapping("/note/{id}")
-    public Mono<ModelAndView> getNoteById(@PathVariable String id, @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient) {
+    public Mono<String> getNoteById(@PathVariable String id, @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient, Model model) {
         log.info("[NotesController] - received request to update note: {}", id);
-        final var model = new ModelAndView("notes/update");
-        return this.service.getNoteById(id, authorizedClient).map(tasksDto -> {
-            model.addObject("id", tasksDto.id());
-            model.addObject("title", tasksDto.title());
-            model.addObject("description", tasksDto.description());
+        return this.service.getNoteById(id, authorizedClient)
+                .map(tasksDto -> {
+            model.addAttribute("id", tasksDto.id());
+            model.addAttribute("title", tasksDto.title());
+            model.addAttribute("description", tasksDto.description());
             return model;
-        });
+        }).map(view -> "/notes/update");
     }
 
     @PutMapping("/update")
-    public Mono<ModelAndView> updateNote(@Valid CreateTaskDto createTaskDto, BindingResult result, @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient) {
+    public Mono<String> updateNote(@Valid CreateTaskDto createTaskDto, BindingResult result, @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient, Model model) {
         log.info("[NotesController] - received request to create new note: {}", createTaskDto);
         if (result.hasErrors()) {
-            return Mono.just(new ModelAndView("notes/update"));
+            return Mono.just("notes/update");
         }
         return this.service.updateNote(createTaskDto, authorizedClient)
-                .map(tasks -> {
-                    final var model = new ModelAndView("notes/home");
-                    return model.addObject("tasks", tasks);
-                });
+                .map(tasks -> model.addAttribute("tasks", tasks))
+                .map(view -> "/notes/home");
     }
 
     @DeleteMapping("/delete/{id}")
-    public Mono<ModelAndView> deleteNote(@PathVariable String id, @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient) {
+    public Mono<String> deleteNote(@PathVariable String id, @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient, Model model) {
         log.info("[NotesController] - received request to Delete note: {}", id);
-
         return this.service.deteleNote(id, authorizedClient)
-                .map(tasks -> {
-                    final var model = new ModelAndView("notes/home");
-                    return model.addObject("tasks", tasks);
-                });
+                .map(tasks -> model.addAttribute("tasks", tasks))
+                .map(view -> "/notes/home");
     }
 
     @GetMapping("/email/{id}")
-    public Mono<String> sendEmail(@PathVariable String id, @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient,
-                                  RedirectAttributes redirectAttributes) {
+    public Mono<ModelAndViewContainer> sendEmail(@PathVariable String id, @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient) {
         log.info("[NotesController] - Received request of User: {} to send e-mail", authorizedClient.getPrincipalName());
+        final var model = new ModelAndViewContainer();
+        model.setViewName("redirect:/notes/home");
         return this.service.sendEmail(id, authorizedClient)
                 .map(result -> {
-                    if(Boolean.TRUE.equals(result)) {
-                        redirectAttributes.addFlashAttribute("message", "E-mail sent with Success!");
-                        redirectAttributes.addFlashAttribute("alertClass", "alert-success");
-                    }else {
-                        redirectAttributes.addFlashAttribute("message", "Failed to send E-mail!");
-                        redirectAttributes.addFlashAttribute("alertClass", "alert-danger");
+                    if (Boolean.TRUE.equals(result)) {
+                        //redirectAttributes.addFlashAttribute("message", );
+                        //redirectAttributes.addFlashAttribute("alertClass", "alert-success");
+                        model.addAttribute("message", "E-mail sent with Success!");
+                        model.addAttribute("alertClass", "alert-success");
+                    } else {
+                        //redirectAttributes.addFlashAttribute("message", "Failed to send E-mail!");
+                        //redirectAttributes.addFlashAttribute("alertClass", "alert-danger");
+                        model.addAttribute("message", "Failed to send E-mail!");
+                        model.addAttribute("alertClass", "alert-danger");
                     }
-                    return "redirect:/notes/home";
+                    return model;
                 });
     }
 }
