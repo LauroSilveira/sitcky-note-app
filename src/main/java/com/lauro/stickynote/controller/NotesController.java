@@ -88,24 +88,19 @@ public class NotesController {
     }
 
     @GetMapping("/email/{id}")
-    public Mono<ModelAndViewContainer> sendEmail(@PathVariable String id, @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient) {
+    public Mono<String> sendEmail(@PathVariable String id, @RegisteredOAuth2AuthorizedClient OAuth2AuthorizedClient authorizedClient, Model model) {
         log.info("[NotesController] - Received request of User: {} to send e-mail", authorizedClient.getPrincipalName());
-        final var model = new ModelAndViewContainer();
-        model.setViewName("redirect:/notes/home");
+
         return this.service.sendEmail(id, authorizedClient)
                 .map(result -> {
                     if (Boolean.TRUE.equals(result)) {
-                        //redirectAttributes.addFlashAttribute("message", );
-                        //redirectAttributes.addFlashAttribute("alertClass", "alert-success");
                         model.addAttribute("message", "E-mail sent with Success!");
                         model.addAttribute("alertClass", "alert-success");
                     } else {
-                        //redirectAttributes.addFlashAttribute("message", "Failed to send E-mail!");
-                        //redirectAttributes.addFlashAttribute("alertClass", "alert-danger");
                         model.addAttribute("message", "Failed to send E-mail!");
                         model.addAttribute("alertClass", "alert-danger");
                     }
-                    return model;
-                });
+                   return model;
+                }).map(view ->  "notes/home");
     }
 }
