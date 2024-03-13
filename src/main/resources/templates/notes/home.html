@@ -18,15 +18,13 @@
         </a>
     </nav>
     <div>
-<!--        <div th:if="${#lists.isEmpty(tasks)}" class="alert alert-primary text-center mt-3" role="alert">There is no
-            notes
-        </div>-->
-        <div class="card text-center mt-3" th:each="task:${tasks.tasks}">
-            <div class="card-header" th:text="${task.title}">Title</div>
+        <div class="card text-center mt-3" th:each="task : ${tasks.tasks}">
+            <div th:if="${#lists.isEmpty(tasks.tasks)}" class="alert alert-primary text-center mt-3" role="alert">There
+                is no notes
+            </div>
+            <div class="card-header text-center" th:text="${task.title}">Title</div>
             <div class="card-body">
-                <ul>
-                    <li class="list-group-item text-center" th:text="${task.description}">Item task</li>
-                </ul>
+                <div class="list-group-item text-center" th:text="${task.description}">Item task</div>
             </div>
             <div class="card-footer d-flex d-flex justify-content-evenly">
                 <form th:method="get" th:action="@{'/notes/note/' + ${task.id}}">
