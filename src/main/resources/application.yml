@@ -27,8 +27,9 @@ spring:
           spring:
             # Authorization Server URL
             issuer-uri: ${AUTHORIZATION_SERVER_URL:http://localhost:9000}
-  # Enable hidden method PUT, DELETE in form actions
-  mvc:
+
+  # Allow to perform methods PUT, DELETE. this hide HTTP method in form actions
+  webflux:
     hiddenmethod:
       filter:
         enabled: true

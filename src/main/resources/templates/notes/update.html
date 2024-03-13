@@ -14,8 +14,7 @@
       </nav>
       <div class="card">
           <form class="card-body" th:action="@{/notes/update}" th:object="${createTaskDto}" th:method="put">
-              <!-- Envia CSRF automaticamente com o thymeleaf atraves da tag th:action-->
-              <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
               <input type="hidden" th:name="id" th:value="${id}"/>
               <div class="form-group mb-3">
                   <label class="form-label">Title</label>
